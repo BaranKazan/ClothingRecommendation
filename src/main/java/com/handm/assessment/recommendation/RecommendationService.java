@@ -10,14 +10,15 @@ import java.util.*;
 @Service
 public class RecommendationService {
 
-    private final List<Product> products = new ArrayList<>();
-    Random random = new Random();
+    private final List<Product> PRODUCTS = new ArrayList<>();
+    private final Random RANDOM = new Random();
 
     /**
      * This construction initiates a method that will generate n amount of products.
      */
     public RecommendationService() {
-        GenerateData(200);
+        int generateDataAmount = 500;
+        generateData(generateDataAmount);
     }
 
     /**
@@ -25,7 +26,7 @@ public class RecommendationService {
      *
      * @param numberOfData Given amount to generate amount of product.
      */
-    public void GenerateData(int numberOfData) {
+    public void generateData(int numberOfData) {
         //Creating different namings
         List<String> hatList = List.of("Cowboy Hat", "Baseball Cap", "Bowler", "Bucket Hat");
         List<String> shirtList = List.of("Turtleneck", "T-Shirt", "Hoody", "Jacket");
@@ -39,17 +40,20 @@ public class RecommendationService {
                 Accessory.class
         );
 
+        int minimumPrice = 20;
+        int maximumPrice = 100;
         //Loop that generates data each iteration.
         for (int i = 0; i < numberOfData; i++) {
-            String size = sizeList.get(random.nextInt(sizeList.size()));
-            String color = colorList.get(random.nextInt(colorList.size()));
-            int price = random.nextInt(80) + 20; //Setting the price range between 20 and 100.
+            String size = sizeList.get(RANDOM.nextInt(sizeList.size()));
+            String color = colorList.get(RANDOM.nextInt(colorList.size()));
+            //Setting the price range between 20 and 100.
+            int price = RANDOM.nextInt(maximumPrice-minimumPrice) + minimumPrice;
             //Uses the previous attribute productTypes to randomly select an instance.
-            Class<? extends Product> productType = productTypes.get(random.nextInt(productTypes.size()));
+            Class<? extends Product> productType = productTypes.get(RANDOM.nextInt(productTypes.size()));
 
-            int numberOfTags = random.nextInt(Tag.values().length) + 1;
+            int numberOfTags = RANDOM.nextInt(Tag.values().length) + 1;
             //Using Java stream to bring given amount of tags. Each are unique.
-            List<Tag> tags = random
+            List<Tag> tags = RANDOM
                     .ints(0, Tag.values().length)
                     .distinct()
                     .limit(numberOfTags)
@@ -60,24 +64,23 @@ public class RecommendationService {
             Product product = null;
             //The if statement checks the instance of the data and creates a type of Product with given instance.
             if (productType.equals(Hat.class)) {
-                name = hatList.get(random.nextInt(hatList.size()));
+                name = hatList.get(RANDOM.nextInt(hatList.size()));
                 product = new Hat(i, name, price, size, tags);
             } else if (productType.equals(Shirt.class)) {
-                name = shirtList.get(random.nextInt(shirtList.size()));
+                name = shirtList.get(RANDOM.nextInt(shirtList.size()));
                 product = new Shirt(i, name, price, size, tags);
             } else if (productType.equals(Pants.class)) {
-                name = pantsList.get(random.nextInt(pantsList.size()));
+                name = pantsList.get(RANDOM.nextInt(pantsList.size()));
                 product = new Pants(i, name, price, size, tags);
             } else if (productType.equals(Shoes.class)) {
-                name = shoeList.get(random.nextInt(shoeList.size()));
+                name = shoeList.get(RANDOM.nextInt(shoeList.size()));
                 product = new Shoes(i, name, price, size, tags);
             } else {
-                name = accessoryList.get(random.nextInt(accessoryList.size()));
+                name = accessoryList.get(RANDOM.nextInt(accessoryList.size()));
                 product = new Accessory(i, name, price, size, tags);
             }
-            products.add(product);
+            PRODUCTS.add(product);
         }
-
     }
 
     /**
@@ -88,23 +91,22 @@ public class RecommendationService {
      */
     public List<Product> getRecommendation(Recommendation recommendation) {
         Set<Tag> recommendedTags = new LinkedHashSet<>();
-        /* It will automatically as preference as Casual and Sporty if a event is Birthday.
+        /* It will automatically add preference as Casual during Birthday event.
         But when it is a special occasion such as wedding, it will add Elegant and Classic as preference. */
         if (recommendation.getEvent() == Event.Birthday) {
             recommendedTags.add(Tag.Casual);
-            recommendedTags.add(Tag.Sporty);
         } else {
             recommendedTags.add(Tag.Elegant);
             recommendedTags.add(Tag.Classic);
         }
         recommendedTags.addAll(recommendation.getPreference());
 
-        List<Product> shuffledProducts = new ArrayList<>(products);
+        List<Product> shuffledProducts = new ArrayList<>(PRODUCTS);
         Collections.shuffle(shuffledProducts);
 
         int budget = recommendation.getBudget();
 
-        return createSet(shuffledProducts, recommendedTags, budget);
+        return generateSet(shuffledProducts, recommendedTags, budget);
     }
 
     /**
@@ -114,7 +116,7 @@ public class RecommendationService {
      * @param budget It is required to recommend a set under the given budget price
      * @return Return a recommended set of clothing
      */
-    public List<Product> createSet(List<Product> products, Set<Tag> tags, int budget) {
+    public List<Product> generateSet(List<Product> products, Set<Tag> tags, int budget) {
         //Creating empty instance of each instance that has Product as their parent.
         Product selectedHat = null;
         Product selectedShoes = null;
@@ -164,18 +166,18 @@ public class RecommendationService {
     }
 
     /**
-     * This method checks if the product matches with the given list of tag.
+     * This method checks if the product matches with all the tags inside the Set.
      * @param product The product that will be checked
      * @param tags The list of tags to check if at least one matches.
      * @return Return true if it has at least one matching tag, else it will return false.
      */
     public boolean matchProduct(Product product, Set<Tag> tags) {
         for (Tag tag : tags) {
-            if (product.getTags().contains(tag)) {
-                return true;
+            if (!product.getTags().contains(tag)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
 }
