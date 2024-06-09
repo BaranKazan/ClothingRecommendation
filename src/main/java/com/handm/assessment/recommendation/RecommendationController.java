@@ -2,16 +2,13 @@ package com.handm.assessment.recommendation;
 
 import com.handm.assessment.product.Product;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 
 @RestController
-@RequestMapping("/recommendation")
+@RequestMapping(value = "/recommendation")
 public class RecommendationController {
 
     private final RecommendationService recommendationService;
@@ -20,7 +17,6 @@ public class RecommendationController {
      * Creating a construct that is depending on the service model. It receives parameter for dependency injection.
      * @param recommendationService
      */
-    @Autowired
     public RecommendationController(RecommendationService recommendationService) {
         this.recommendationService = recommendationService;
     }
